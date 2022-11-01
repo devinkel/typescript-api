@@ -1,0 +1,41 @@
+{
+  "name": "typescript-api",
+  "version": "1.0.0",
+  "description": "Typescript node js API",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "yarn build && node dist/src/index.js",
+    "start:dev": "ts-node-dev 'src/index.ts'",
+    "lint": "eslint ./src ./test --ext .ts",
+    "lint:fix": "eslint ./src ./test --ext .ts --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devinkel/typescript-api.git"
+  },
+  "keywords": [
+    "nodejs",
+    "typescript",
+    "api"
+  ],
+  "author": "Kelvin Rosa",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/devinkel/typescript-api/issues"
+  },
+  "homepage": "https://github.com/devinkel/typescript-api#readme",
+  "devDependencies": {
+    "@types/module-alias": "^2.0.1",
+    "@types/node": "^18.11.8",
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "@typescript-eslint/parser": "^5.42.0",
+    "eslint": "^8.26.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "module-alias": "^2.2.2"
+  }
+}
