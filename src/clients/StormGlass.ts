@@ -1,5 +1,6 @@
-import { InternalError } from '@src/util/errors/internal-error';
 import axios, { AxiosError, AxiosStatic } from 'axios';
+import { InternalError } from '@src/util/errors/internal-error';
+import config, { IConfig } from 'config';
 
 export interface StormGlassPointSource {
     [key: string]: number;
@@ -45,6 +46,9 @@ export class StormGlassResponseError extends InternalError {
     }
 }
 
+const stormGlassResourceConfig: IConfig = config.get('App.resources.StormGlass');
+
+
 export class StormGlass {
     readonly stormGlassAPIParams =
         'swellDirection,swellHeight,swellPeriod,waveHeight,waveDirection,windDirection,windSpeed';
@@ -52,13 +56,13 @@ export class StormGlass {
 
     constructor(protected request: AxiosStatic) { }
 
-    public async fetchPoints(lat: number, lng: number ): Promise<ForecastPoint[]> {
+    public async fetchPoints(lat: number, lng: number): Promise<ForecastPoint[]> {
         try {
             const response = await this.request.get<StormGlassForecastResponse>(
-                `https://api.stormglass.io/v2/weather/point%20%20%20%20?lat=${lat}&lng=${lng}&params=${this.stormGlassAPIParams}&source=${this.stormGlassAPISource}`,
+                `${stormGlassResourceConfig.get('apiUrl')}/weather/point%20%20%20%20?lat=${lat}&lng=${lng}&params=${this.stormGlassAPIParams}&source=${this.stormGlassAPISource}`,
                 {
                     headers: {
-                        Authorization: 'fake-token',
+                        Authorization: stormGlassResourceConfig.get('apiToken'),
                     },
                 }
             );
@@ -66,14 +70,13 @@ export class StormGlass {
         } catch (err) {
             const axiosError = err as AxiosError;
             if (
-              axiosError.response &&
-              axiosError.response.status
+                axiosError.response &&
+                axiosError.response.status
             ) {
-              throw new StormGlassResponseError(
-                `Error: ${JSON.stringify(axiosError.response.data)} Code: ${
-                  axiosError.response.status
-                }`
-              );
+                throw new StormGlassResponseError(
+                    `Error: ${JSON.stringify(axiosError.response.data)} Code: ${axiosError.response.status
+                    }`
+                );
             }
             throw new ClientRequestError(axiosError.message);
         }
