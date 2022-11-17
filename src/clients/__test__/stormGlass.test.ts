@@ -1,23 +1,25 @@
 import { StormGlass } from '@src/clients/stormGlass';
-import axios from 'axios';
+import * as HTTPUtil from '@src/util/request';
 import stormGlassWeather3HoursFixture from '@test/fixtures/stormglass_weather_3_hours.json';
 import stormGlassWeather3HoursFixtureNormalized from '@test/fixtures/stormglass_normalized_3_hours.json';
 
 // simulando a funcao fetchPoint do StormGlass com mock para dps trocar pro fetch
-jest.mock('axios');
+jest.mock('@src/util/request');
 
 describe('StormGlass Client', () => {
-    const mockedAxios = axios as jest.Mocked<typeof axios>;
+    const mockedRequest = new HTTPUtil.Request() as jest.Mocked<HTTPUtil.Request>;
+
+    const MockedRequestClass = HTTPUtil.Request as jest.Mocked<typeof HTTPUtil.Request>;
 
     it('should return the normalized forecast from the StormGlass service', async () => {
         const lat = 58.7984;
         const lng = 17.8081;
 
-        mockedAxios.get.mockResolvedValueOnce({
+        mockedRequest.get.mockResolvedValueOnce({
             data: stormGlassWeather3HoursFixture,
-        });
+        } as HTTPUtil.Response);
 
-        const stormGlass = new StormGlass(mockedAxios);
+        const stormGlass = new StormGlass(mockedRequest);
         const response = await stormGlass.fetchPoints(lat, lng);
         expect(response).toEqual(stormGlassWeather3HoursFixtureNormalized);
     });
@@ -35,9 +37,9 @@ describe('StormGlass Client', () => {
                 },
             ],
         };
-        mockedAxios.get.mockResolvedValue({ data: incompletResponse });
+        mockedRequest.get.mockResolvedValue({ data: incompletResponse } as HTTPUtil.Response);
 
-        const stormGlass = new StormGlass(mockedAxios);
+        const stormGlass = new StormGlass(mockedRequest);
         const response = await stormGlass.fetchPoints(lat, lng);
 
         expect(response).toEqual([]);
@@ -47,30 +49,43 @@ describe('StormGlass Client', () => {
         const lat = 58.7984;
         const lng = 17.8081;
 
-        mockedAxios.get.mockRejectedValue({ message: ' Network Error ' });
+        mockedRequest.get.mockRejectedValue('Network Error');
 
-        const stormGlass = new StormGlass(mockedAxios);
+        const stormGlass = new StormGlass(mockedRequest);
 
         await expect(stormGlass.fetchPoints(lat, lng)).rejects.toThrow(
-            'Unexpected error when trying to communicate to StormGlass: Network Error'
+            'Unexpected error when trying to communicate to StormGlass:"Network Error"'
         );
     });
 
-    it('should get a StormGlassResponseError when the StormGlass service responds with error', async () => {
-        const lat = 58.7984;
-        const lng = 17.8081;
-
-        mockedAxios.get.mockRejectedValue({
-            response: {
-                status : 402,
-                data: { errors: {key: "API quota exceeded"}}
-            }
+    it('should get an StormGlassResponseError when the StormGlass service responds with error', async () => {
+        const lat = -33.792726;
+        const lng = 151.289824;
+    
+        class FakeAxiosError extends Error {
+          constructor(public response: object) {
+            super();
+          }
+        }
+    
+        mockedRequest.get.mockRejectedValue(
+          new FakeAxiosError({
+            status: 429,
+            data: { errors: ['Rate Limit reached'] },
+          })
+        );
+    
+        MockedRequestClass.isRequestError.mockReturnValue(true);
+    
+        MockedRequestClass.extractErrorData.mockReturnValue({
+          status: 429,
+          data: { errors: ['Rate Limit reached'] },
         });
-
-        const stormGlass = new StormGlass(mockedAxios)
-
+    
+        const stormGlass = new StormGlass(mockedRequest);
+    
         await expect(stormGlass.fetchPoints(lat, lng)).rejects.toThrow(
-            'Unexpected error returned by the StormGlass service: Error: {"errors":{"key":"API quota exceeded"}} Code: 402'
+          'Unexpected error returned by the StormGlass service: Error: {"errors":["Rate Limit reached"]} Code: 429'
         );
-    });
+      });
 });
