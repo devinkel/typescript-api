@@ -7,9 +7,12 @@ import stormGlassWeather3HoursFixtureNormalized from '@test/fixtures/stormglass_
 jest.mock('@src/util/request');
 
 describe('StormGlass Client', () => {
-    const mockedRequest = new HTTPUtil.Request() as jest.Mocked<HTTPUtil.Request>;
+    const mockedRequest =
+        new HTTPUtil.Request() as jest.Mocked<HTTPUtil.Request>;
 
-    const MockedRequestClass = HTTPUtil.Request as jest.Mocked<typeof HTTPUtil.Request>;
+    const MockedRequestClass = HTTPUtil.Request as jest.Mocked<
+        typeof HTTPUtil.Request
+    >;
 
     it('should return the normalized forecast from the StormGlass service', async () => {
         const lat = 58.7984;
@@ -37,7 +40,9 @@ describe('StormGlass Client', () => {
                 },
             ],
         };
-        mockedRequest.get.mockResolvedValue({ data: incompletResponse } as HTTPUtil.Response);
+        mockedRequest.get.mockResolvedValue({
+            data: incompletResponse,
+        } as HTTPUtil.Response);
 
         const stormGlass = new StormGlass(mockedRequest);
         const response = await stormGlass.fetchPoints(lat, lng);
@@ -61,31 +66,31 @@ describe('StormGlass Client', () => {
     it('should get an StormGlassResponseError when the StormGlass service responds with error', async () => {
         const lat = -33.792726;
         const lng = 151.289824;
-    
+
         class FakeAxiosError extends Error {
-          constructor(public response: object) {
-            super();
-          }
+            constructor(public response: object) {
+                super();
+            }
         }
-    
+
         mockedRequest.get.mockRejectedValue(
-          new FakeAxiosError({
+            new FakeAxiosError({
+                status: 429,
+                data: { errors: ['Rate Limit reached'] },
+            })
+        );
+
+        MockedRequestClass.isRequestError.mockReturnValue(true);
+
+        MockedRequestClass.extractErrorData.mockReturnValue({
             status: 429,
             data: { errors: ['Rate Limit reached'] },
-          })
-        );
-    
-        MockedRequestClass.isRequestError.mockReturnValue(true);
-    
-        MockedRequestClass.extractErrorData.mockReturnValue({
-          status: 429,
-          data: { errors: ['Rate Limit reached'] },
         });
-    
+
         const stormGlass = new StormGlass(mockedRequest);
-    
+
         await expect(stormGlass.fetchPoints(lat, lng)).rejects.toThrow(
-          'Unexpected error returned by the StormGlass service: Error: {"errors":["Rate Limit reached"]} Code: 429'
+            'Unexpected error returned by the StormGlass service: Error: {"errors":["Rate Limit reached"]} Code: 429'
         );
-      });
+    });
 });

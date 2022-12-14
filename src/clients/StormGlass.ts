@@ -35,32 +35,42 @@ export interface ForecastPoint {
 
 export class ClientRequestError extends InternalError {
     constructor(message: string) {
-        const internalMessage = 'Unexpected error when trying to communicate to StormGlass';
+        const internalMessage =
+            'Unexpected error when trying to communicate to StormGlass';
         super(`${internalMessage}:${message}`);
     }
 }
 
 export class StormGlassResponseError extends InternalError {
     constructor(message: string) {
-        const internalMessage = 'Unexpected error returned by the StormGlass service';
-        super(`${internalMessage}: ${message}`)
+        const internalMessage =
+            'Unexpected error returned by the StormGlass service';
+        super(`${internalMessage}: ${message}`);
     }
 }
 
-const stormGlassResourceConfig: IConfig = config.get('App.resources.StormGlass');
-
+const stormGlassResourceConfig: IConfig = config.get(
+    'App.resources.StormGlass'
+);
 
 export class StormGlass {
     readonly stormGlassAPIParams =
         'swellDirection,swellHeight,swellPeriod,waveHeight,waveDirection,windDirection,windSpeed';
     readonly stormGlassAPISource = 'noaa';
 
-    constructor(protected request = new HTTPUtil.Request()) { }
+    constructor(protected request = new HTTPUtil.Request()) {}
 
-    public async fetchPoints(lat: number, lng: number): Promise<ForecastPoint[]> {
+    public async fetchPoints(
+        lat: number,
+        lng: number
+    ): Promise<ForecastPoint[]> {
         try {
             const response = await this.request.get<StormGlassForecastResponse>(
-                `${stormGlassResourceConfig.get('apiUrl')}/weather/point%20%20%20%20?lat=${lat}&lng=${lng}&params=${this.stormGlassAPIParams}&source=${this.stormGlassAPISource}`,
+                `${stormGlassResourceConfig.get(
+                    'apiUrl'
+                )}/weather/point%20%20%20%20?lat=${lat}&lng=${lng}&params=${
+                    this.stormGlassAPIParams
+                }&source=${this.stormGlassAPISource}`,
                 {
                     headers: {
                         Authorization: stormGlassResourceConfig.get('apiToken'),
@@ -68,10 +78,12 @@ export class StormGlass {
                 }
             );
             return this.normalizeResponse(response.data);
-        } catch (err) {;
-            if ( err instanceof Error && HTTPUtil.Request.isRequestError(err)) {
+        } catch (err) {
+            if (err instanceof Error && HTTPUtil.Request.isRequestError(err)) {
                 const error = HTTPUtil.Request.extractErrorData(err);
-                throw new StormGlassResponseError( `Error: ${JSON.stringify(error.data)} Code: ${error.status}`);
+                throw new StormGlassResponseError(
+                    `Error: ${JSON.stringify(error.data)} Code: ${error.status}`
+                );
             }
             throw new ClientRequestError(JSON.stringify(err));
         }
