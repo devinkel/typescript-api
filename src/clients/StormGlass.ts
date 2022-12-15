@@ -58,7 +58,7 @@ export class StormGlass {
         'swellDirection,swellHeight,swellPeriod,waveHeight,waveDirection,windDirection,windSpeed';
     readonly stormGlassAPISource = 'noaa';
 
-    constructor(protected request = new HTTPUtil.Request()) {}
+    constructor(protected request = new HTTPUtil.Request()) { }
 
     public async fetchPoints(
         lat: number,
@@ -68,8 +68,7 @@ export class StormGlass {
             const response = await this.request.get<StormGlassForecastResponse>(
                 `${stormGlassResourceConfig.get(
                     'apiUrl'
-                )}/weather/point%20%20%20%20?lat=${lat}&lng=${lng}&params=${
-                    this.stormGlassAPIParams
+                )}/weather/point%20%20%20%20?lat=${lat}&lng=${lng}&params=${this.stormGlassAPIParams
                 }&source=${this.stormGlassAPISource}`,
                 {
                     headers: {
