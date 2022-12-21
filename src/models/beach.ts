@@ -7,7 +7,7 @@ export enum BeachPosition {
     N = 'N'
 }
 
-export interface IBeach {
+export interface Beach {
     _id?: string,
     name: string;
     position: BeachPosition;
@@ -34,5 +34,5 @@ const schema = new mongoose.Schema(
     }
 );
 // criando uma interface do model para ter acesso aos typos e também aos metódos do moongose. EX save()/find()
-export interface IBeachModel extends Omit<IBeach, '_id'>, Document { }
-export const Beach: Model<IBeachModel> = mongoose.model<IBeachModel>('Beach', schema);
+export interface BeachModel extends Omit<Beach, '_id'>, Document { }
+export const Beach: Model<BeachModel> = mongoose.model<BeachModel>('Beach', schema);
