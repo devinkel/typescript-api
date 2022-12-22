@@ -8,10 +8,7 @@ export interface Response<T = any> extends AxiosResponse<T> { }
 export class Request {
     constructor(private request = axios) { }
 
-    public get<T>(
-        url: string,
-        config: RequestConfig = {}
-    ): Promise<Response<T>> {
+    public get<T>(url: string,config: RequestConfig = {}): Promise<Response<T>> {
         return this.request.get<T, Response<T>>(url, config);
     }
 
@@ -22,9 +19,7 @@ export class Request {
         );
     }
 
-    public static extractErrorData(
-        error: unknown
-    ): Pick<AxiosResponse, 'data' | 'status'> {
+    public static extractErrorData(error: unknown): Pick<AxiosResponse, 'data' | 'status'> {
         const axiosError = error as AxiosError;
         if (axiosError.response && axiosError.response.status) {
             return {
