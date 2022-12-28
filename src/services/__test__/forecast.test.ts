@@ -16,6 +16,7 @@ describe('Forecast Service', () => {
                 "lng": 151.289428,
                 "name": "Mainly",
                 "position": BeachPosition.E,
+                "user": 'fake-id'
             }
         ]
 
@@ -100,6 +101,7 @@ describe('Forecast Service', () => {
                 "lng": 151.289428,
                 "name": "Mainly",
                 "position": BeachPosition.E,
+                "user": 'fake-id'
             }
         ];
         
