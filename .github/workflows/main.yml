@@ -47,6 +47,7 @@ jobs:
       if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
       uses: bounceapp/render-action@0.2.0
       with:
-          api_key: ${{ secrets.RENDER_API_KEY }}
-          project_id: ${{ secrets.RENDER_PROJECT_ID }}
-          environment: production
+        email: ${{ secrets.RENDER_EMAIL }}
+        password: ${{ secrets.RENDER_PASSWORD }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        service-id: srv-xxxxxxxxxxxxxxxxxxxx
