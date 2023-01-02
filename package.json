@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/src/index.js",
+    "start": "yarn build && node dist/src/index.js",
     "start:local": "ts-node-dev --files 'src/index.ts' | pino-pretty -c",
     "lint": "eslint ./src ./test --ext .ts",
     "lint:fix": "eslint ./src ./test --ext .ts --fix",
