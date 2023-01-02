@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { BaseController } from '.';
 import { authMiddleware } from '@src/middlewares/auth';
+import logger from '@src/logger';
 
 @Controller('beaches')
 @ClassMiddleware(authMiddleware)
@@ -18,6 +19,7 @@ export class BeachesController extends BaseController {
             // enviando a resposta para o usuário.
             res.status(201).send(result);
         } catch (error: any) {
+            logger.error(error);
             this.sendCreatedUpdatedErrorResponse(res, error);
         }
     }

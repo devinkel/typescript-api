@@ -1,4 +1,5 @@
 import { ForecastPoint, StormGlass } from "@src/clients/StormGlass";
+import logger from "@src/logger";
 import { Beach } from "@src/models/beach";
 import { InternalError } from "@src/util/errors/internal-error";
 
@@ -10,9 +11,9 @@ export interface TimeForecast {
 }
 // END INTERFACES AND UTILS
 
-export class ForecastProcessingInternalError extends InternalError{
+export class ForecastProcessingInternalError extends InternalError {
     constructor(message: string) {
-        super( `Unexpected error during the forecast processing: ${message}` );
+        super(`Unexpected error during the forecast processing: ${message}`);
     }
 }
 
@@ -21,6 +22,7 @@ export class Forecast {
 
     public async processForecastForBeaches(beaches: Beach[]): Promise<TimeForecast[]> {
         const pointsWithCorrectSources: BeachForecast[] = [];
+        logger.info(`Preparing the forecast for ${beaches.length} beaches`)
         try {
             for (const beach of beaches) {
                 const points = await this.stormGlass.fetchPoints(beach.lat, beach.lng);
@@ -29,7 +31,8 @@ export class Forecast {
             }
             return this.mapForecastByTime(pointsWithCorrectSources);
 
-        } catch (error:any) {
+        } catch (error: any) {
+            logger.error(error);
             throw new ForecastProcessingInternalError(error.message)
         }
     }
