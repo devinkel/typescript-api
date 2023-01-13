@@ -3,26 +3,26 @@ import { AuthService } from '@src/services/auth';
 import logger from '@src/logger';
 
 export interface User {
-    _id?: string,
-    name: string,
-    email: string,
-    password: string,
+    _id?: string;
+    name: string;
+    email: string;
+    password: string;
 }
 
 export enum CUSTOM_VALIDATION {
-    DUPLICATED = 'DUPLICATED'
+    DUPLICATED = 'DUPLICATED',
 }
 
-interface UserModel extends Omit<User, '_id'>, Document { }
+interface UserModel extends Omit<User, '_id'>, Document {}
 
 const schema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         email: {
             type: String,
-            unique: [true, 'E-mail must be unique']
+            unique: [true, 'E-mail must be unique'],
         },
-        password: { type: String, requerid: true }
+        password: { type: String, requerid: true },
     },
     {
         toJSON: {
@@ -30,24 +30,28 @@ const schema = new mongoose.Schema(
                 ret.id = ret._id;
                 delete ret._id;
                 delete ret.__v;
-            }
-        }
+            },
+        },
     }
 );
 
 /**
  * Validates the email and throws a validation error, otherwise it will throw a 500
  */
-schema.path('email').validate(async (email: string) => {
-    const emailCount = await mongoose.models.User.countDocuments({ email });
-    return !emailCount;
-}, 'already exists in the database', CUSTOM_VALIDATION.DUPLICATED);
+schema.path('email').validate(
+    async (email: string) => {
+        const emailCount = await mongoose.models.User.countDocuments({ email });
+        return !emailCount;
+    },
+    'already exists in the database',
+    CUSTOM_VALIDATION.DUPLICATED
+);
 
 /**
  * Hashing password pre-save user in the database
-*/
+ */
 schema.pre<UserModel>('save', async function (): Promise<void> {
-    if (!this.password || !this.isModified('password')) { 
+    if (!this.password || !this.isModified('password')) {
         return;
     }
     try {

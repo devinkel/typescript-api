@@ -1,16 +1,16 @@
-import { Beach, BeachPosition } from '@src/models/beach';
-import stormGlassWeather3HoursFixture from '@test/fixtures/stormglass_weather_3_hours.json'
-import apiForecastResponse1BeachFixture from '@test/fixtures/api_forecast_1_beach.json'
+import { Beach, GeoPosition } from '@src/models/beach';
+import stormGlassWeather3HoursFixture from '@test/fixtures/stormglass_weather_3_hours.json';
+import apiForecastResponse1BeachFixture from '@test/fixtures/api_forecast_1_beach.json';
 import nock from 'nock';
 import { User } from '@src/models/user';
 import { AuthService } from '@src/services/auth';
 
 describe('Beach Forecast functional tests', () => {
     const defaultUser = {
-        name: "kelvin",
-        email: "kelvin@email.com",
-        password: "kelvin123"
-    }
+        name: 'kelvin',
+        email: 'kelvin@email.com',
+        password: 'kelvin123',
+    };
     let token: string;
     beforeEach(async () => {
         await Beach.deleteMany({});
@@ -20,13 +20,13 @@ describe('Beach Forecast functional tests', () => {
             lat: -33.792726,
             lng: 151.289824,
             name: 'Manly',
-            position: BeachPosition.E,
-            user: user.id
-        }
+            position: GeoPosition.E,
+            user: user.id,
+        };
         await new Beach(defaultBeach).save();
         token = AuthService.generateToken(user.toJSON());
     });
-    
+
     it(' should return a forecast with just a few times ', async () => {
         nock('https://api.stormglass.io:443', {
             encodedQueryParams: true,
@@ -34,16 +34,18 @@ describe('Beach Forecast functional tests', () => {
                 Authorization: (): boolean => true,
             },
         })
-            .defaultReplyHeaders({'access-control-allow-origin': '*'})
+            .defaultReplyHeaders({ 'access-control-allow-origin': '*' })
             .get('/v2/weather/point')
             .query({
                 lat: -33.792726,
                 lng: 151.289824,
                 params: /(.*)/,
-                source: 'noaa'
+                source: 'noaa',
             })
-            .reply(200, stormGlassWeather3HoursFixture)
-        const { body, status } = await global.testRequest.get('/forecast').set({'x-access-token': token });
+            .reply(200, stormGlassWeather3HoursFixture);
+        const { body, status } = await global.testRequest
+            .get('/forecast')
+            .set({ 'x-access-token': token });
         expect(status).toBe(200);
         expect(body).toEqual(apiForecastResponse1BeachFixture);
     });

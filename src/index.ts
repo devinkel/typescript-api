@@ -17,7 +17,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 // ouvindo todas as Exception que não foram tratadas e finalizando a App
-process.on('uncaughtException',(error) => {
+process.on('uncaughtException', (error) => {
     logger.error(`App exiting due to an uncaught exception: ${error}`);
     process.exit(ExitStatus.Failure);
 });
@@ -41,7 +41,6 @@ process.on('uncaughtException',(error) => {
                 }
             });
         }
-
     } catch (error) {
         logger.error(`App exited with error: ${error}`);
         process.exit(ExitStatus.Failure); // desligando a app caso algum erro aconteça na inicialização

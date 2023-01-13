@@ -1,6 +1,9 @@
 import './util/module-alias';
 import { Server } from '@overnightjs/core';
 import bodyParser from 'body-parser';
+import * as http from 'http';
+import expressPino from 'express-pino-logger';
+import cors from 'cors';
 import { Application } from 'express';
 import { ForecastController } from './controllers/forecast';
 import * as database from '@src/database';
@@ -9,6 +12,8 @@ import { UsersController } from './controllers/users';
 import logger from './logger';
 
 export class SetupServer extends Server {
+    private server?: http.Server;
+
     constructor(private port = 3000) {
         super();
     }
@@ -18,23 +23,27 @@ export class SetupServer extends Server {
         this.setupControllers();
         await this.setupDatabase();
     }
-    
+
     private setupExpress(): void {
         this.app.use(bodyParser.json()); // settando a app para transacionar dados em json
+        this.app.use(expressPino({ logger }));
+        this.app.use(cors({
+            origin: '*'
+        }));
     }
-    
+
     private setupControllers(): void {
         const forecastController = new ForecastController();
-        const beachesController = new BeachesController() ;
+        const beachesController = new BeachesController();
         const usersController = new UsersController();
         this.addControllers([
             forecastController,
             beachesController,
-            usersController
+            usersController,
         ]);
     }
 
-    private async setupDatabase(): Promise<void>{
+    private async setupDatabase(): Promise<void> {
         await database.connect();
     }
 
@@ -42,10 +51,10 @@ export class SetupServer extends Server {
         await database.close();
     }
 
-    public start (): void {
+    public start(): void {
         this.app.listen(this.port, () => {
             logger.info('Server listening on port: ' + this.port);
-        })
+        });
     }
 
     public getApp(): Application {
