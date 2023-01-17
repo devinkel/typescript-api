@@ -1,25 +1,59 @@
-import { ClassMiddleware, Controller, Get } from '@overnightjs/core';
+import {
+    ClassMiddleware,
+    Controller,
+    Get,
+    Middleware,
+} from '@overnightjs/core';
 import logger from '@src/logger';
 import { authMiddleware } from '@src/middlewares/auth';
 import { Beach } from '@src/models/beach';
-import { Forecast } from '@src/services/forecast';
+import { BeachForecast, Forecast } from '@src/services/forecast';
 import { Request, Response } from 'express';
 import { BaseController } from '.';
+import { rateLimit } from 'express-rate-limit';
+import apiError from '@src/util/errors/api-error';
 
 const forecast = new Forecast();
+
+const rateLimiter = rateLimit({
+    windowMs: 3 * 60 * 60 * 1000,
+    max: 1,
+    keyGenerator(req: Request): string {
+        return req.ip;
+    },
+    handler(_, res: Response): void {
+        res.status(429).send(
+            apiError.format({
+                code: 429,
+                message: 'Too many requests to the /forecast endpoint',
+            })
+        );
+    },
+});
 
 @Controller('forecast')
 @ClassMiddleware(authMiddleware)
 export class ForecastController extends BaseController {
     @Get('')
+    @Middleware(rateLimiter)
     public async getForecastForLoggedUser(
         req: Request,
         res: Response
     ): Promise<void> {
         try {
+            const {
+                orderBy,
+                orderField,
+            }: {
+                orderBy?: 'asc' | 'desc';
+                orderField?: keyof BeachForecast;
+            } = req.query;
+
             const beaches = await Beach.find({ user: req.decoded?.id });
             const forecastData = await forecast.processForecastForBeaches(
-                beaches
+                beaches,
+                orderBy,
+                orderField
             );
             res.status(200).send(forecastData);
         } catch (error) {

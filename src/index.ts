@@ -29,7 +29,7 @@ process.on('uncaughtException', (error) => {
         server.start();
 
         const exitSignals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
-        for (let signal of exitSignals) {
+        for (const signal of exitSignals) {
             process.on(signal, async () => {
                 try {
                     await server.close();

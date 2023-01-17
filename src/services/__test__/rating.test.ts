@@ -1,5 +1,5 @@
-import { Beach, GeoPosition } from "@src/models/beach";
-import { Rating } from "../rating";
+import { Beach, GeoPosition } from '@src/models/beach';
+import { Rating } from '../rating';
 
 describe('Rating Setvice', () => {
     const defaultBeach = {
@@ -7,7 +7,7 @@ describe('Rating Setvice', () => {
         lng: 151.2321312,
         name: 'Navega',
         position: GeoPosition.E,
-        user: 'some-user'
+        user: 'some-user',
     };
 
     const defaultRating = new Rating(defaultBeach);
@@ -21,8 +21,8 @@ describe('Rating Setvice', () => {
             waveDirection: 110,
             waveHeight: 0.1,
             windDirection: 100,
-            windSpeed: 100
-        }
+            windSpeed: 100,
+        };
 
         it('should get a rating less than 1 for a poor point', () => {
             const rating = defaultRating.getRateForPoint(defaultPoint);
@@ -159,12 +159,11 @@ describe('Rating Setvice', () => {
             const rating = defaultRating.getRatingForSwellPeriod(16);
             expect(rating).toBe(5);
         });
-
     });
 
     /**
      * Altura do swell
-    */
+     */
     describe('Get rating based on swell height', () => {
         it('should get a rating of 1 for less than ankle to knee high swell', () => {
             const rating = defaultRating.getRatingForSwellSize(0.2);
@@ -185,12 +184,11 @@ describe('Rating Setvice', () => {
             const rating = defaultRating.getRatingForSwellSize(2.5);
             expect(rating).toBe(5);
         });
-
     });
 
     /**
-    * Direção do vento
-    */
+     * Direção do vento
+     */
     describe('Get position based on points location', () => {
         it('should get the point based on a east location', () => {
             const rating = defaultRating.getPositionFromLocation(92);
@@ -216,6 +214,5 @@ describe('Rating Setvice', () => {
             const rating = defaultRating.getPositionFromLocation(300);
             expect(rating).toBe(GeoPosition.W);
         });
-
     });
 });

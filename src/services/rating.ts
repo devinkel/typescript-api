@@ -1,37 +1,47 @@
-import { ForecastPoint } from "@src/clients/StormGlass";
-import { Beach, GeoPosition } from "@src/models/beach";
+import { ForecastPoint } from '@src/clients/StormGlass';
+import { Beach, GeoPosition } from '@src/models/beach';
 
 const waveHeights = {
     ankleToKnee: {
         min: 0.3,
-        max: 1.0
+        max: 1.0,
     },
     waistHigh: {
         min: 1.0,
-        max: 2.0
+        max: 2.0,
     },
     headHigh: {
         min: 2.0,
-        max: 2.5
-    }
-}
+        max: 2.5,
+    },
+};
 
 export class Rating {
-
-    constructor(private beach: Beach) { }
+    constructor(private beach: Beach) {}
 
     public getRateForPoint(point: ForecastPoint): number {
-        const swellDirection = this.getPositionFromLocation(point.swellDirection);
+        const swellDirection = this.getPositionFromLocation(
+            point.swellDirection
+        );
         const windDirection = this.getPositionFromLocation(point.windDirection);
-        const windAndWaveRating = this.getRatingBasedOnWindAndWavePosition(swellDirection, windDirection);
+        const windAndWaveRating = this.getRatingBasedOnWindAndWavePosition(
+            swellDirection,
+            windDirection
+        );
         const swellHeightRating = this.getRatingForSwellSize(point.swellHeight);
-        const swellPeriodRating = this.getRatingForSwellPeriod(point.swellPeriod);
-        const finalRating = (windAndWaveRating + swellHeightRating + swellPeriodRating) / 3;
+        const swellPeriodRating = this.getRatingForSwellPeriod(
+            point.swellPeriod
+        );
+        const finalRating =
+            (windAndWaveRating + swellHeightRating + swellPeriodRating) / 3;
 
         return Math.round(finalRating);
     }
 
-    public getRatingBasedOnWindAndWavePosition(wavePosition: GeoPosition, windPosition: GeoPosition): number {
+    public getRatingBasedOnWindAndWavePosition(
+        wavePosition: GeoPosition,
+        windPosition: GeoPosition
+    ): number {
         if (wavePosition === windPosition) return 1;
         if (this.isWindOffShore(wavePosition, windPosition)) return 5;
 
@@ -60,7 +70,13 @@ export class Rating {
         return GeoPosition.N;
     }
 
-    private isWindOffShore(wavePosition: GeoPosition, windPosition: GeoPosition): boolean {
-        return ("NESW".indexOf(wavePosition) + "NESW".indexOf(windPosition)) % 2 == 0;
+    private isWindOffShore(
+        wavePosition: GeoPosition,
+        windPosition: GeoPosition
+    ): boolean {
+        return (
+            ('NESW'.indexOf(wavePosition) + 'NESW'.indexOf(windPosition)) % 2 ==
+            0
+        );
     }
 }

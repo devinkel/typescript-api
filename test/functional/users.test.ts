@@ -29,7 +29,7 @@ describe('Users Functional Tests', () => {
             );
         });
 
-        it('should return 422 when there is a validation error', async () => {
+        it('should return 400 when there is a validation error', async () => {
             const newUser = {
                 email: 'kelvin@email.com',
                 password: 'kelvin123',
@@ -39,9 +39,10 @@ describe('Users Functional Tests', () => {
                 .post('/users')
                 .send(newUser);
             expect(response.body).toEqual({
-                code: 422,
-                error: 'Unprocessable Entity',
-                message: 'User validation failed: name: Path `name` is required.',
+                code: 400,
+                error: 'Bad Request',
+                message:
+                    'User validation failed: name: Path `name` is required.',
             });
         });
 
@@ -60,8 +61,9 @@ describe('Users Functional Tests', () => {
             expect(response.status).toBe(409);
             expect(response.body).toEqual({
                 code: 409,
-                error: "Conflict",
-                message: 'User validation failed: email: already exists in the database',
+                error: 'Conflict',
+                message:
+                    'User validation failed: email: already exists in the database',
             });
         });
     });
